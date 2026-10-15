@@ -37,16 +37,11 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Пользователь с ID " + userId + " не найден");
         }
         User user = userOptional.get();
-
         List<Task> tasks = taskRepository.findByUserName(user.getName());
-
         for (Task task : tasks) {
             commentRepository.deleteAll(task.getComments());
         }
-
         taskRepository.deleteAll(tasks);
-
         userRepository.delete(user);
-
     }
 }
