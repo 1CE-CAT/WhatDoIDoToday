@@ -1,53 +1,19 @@
 package ru.maks.NauJava.dao;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import ru.maks.NauJava.entity.Task;
+import ru.maks.NauJava.entity.TaskStatus;
 
-@Component 
-public class TaskRepository implements CrudRepository<Task, Long> {
-    
-    private final List<Task> taskContainer;
+public interface TaskRepository extends CrudRepository<Task, Long> {
 
-    @Autowired 
-    public TaskRepository(List<Task> taskContainer) {
-        this.taskContainer = taskContainer;
-    }
+    List<Task> findByStatusAndDeadlineBefore(TaskStatus status, LocalDateTime date);
 
-    @Override
-    public void create(Task entity) {
-        taskContainer.add(entity);
-    }
-
-    @Override
-    public Task read(Long id) {
-        return taskContainer.stream()
-                .filter(task -> task.getId() == id)
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Override
-    public void update(Task entity) {
-        Task existingTask = read(entity.getId());
-        if (existingTask != null) {
-            existingTask.setTitle(entity.getTitle());
-            existingTask.setDescription(entity.getDescription());
-            existingTask.setStatus(entity.getStatus());
-            existingTask.setDeadline(entity.getDeadline());
-            existingTask.setNotificationEnabled(entity.isNotificationEnabled());
-        }
-    }
-
-    @Override
-    public void delete(Long id) {
-        Task taskToDelete = read(id);
-        if (taskToDelete != null) {
-            taskContainer.remove(taskToDelete);
-        }
-    }
-    
+    @Query("SELECT t FROM Task t WHERE t.user.name = :userName")
+    List<Task> findByUserName(@Param("userName") String userName);
 }
