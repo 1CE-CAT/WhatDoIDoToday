@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import ru.maks.NauJava.entity.Task;
 import ru.maks.NauJava.entity.TaskStatus;
 
-public interface TaskRepository extends CrudRepository<Task, Long> {
+public interface TaskRepository extends CrudRepository<Task, Long>, TaskRepositoryCustom {
 
     List<Task> findByStatusAndDeadlineBefore(TaskStatus status, LocalDateTime date);
 
