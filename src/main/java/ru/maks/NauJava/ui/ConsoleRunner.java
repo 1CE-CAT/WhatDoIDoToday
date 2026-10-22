@@ -2,33 +2,38 @@ package ru.maks.NauJava.ui;
 
 import java.util.Scanner;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration 
+@Configuration
 public class ConsoleRunner {
-    
-    private CommandProcessor commandProcessor;
 
-    @Value("${app.name:Default App Name}")
-    private String appName;
+    private final CommandProcessor commandProcessor;
 
-    @Value("${app.version:0.0.0}")
-    private String appVersion;
+    public ConsoleRunner(CommandProcessor commandProcessor) {
+        this.commandProcessor = commandProcessor;
+    }
 
-
-    @Bean 
+    @Bean
     public CommandLineRunner commandScanner() {
         return args -> {
-            System.out.println("Запуск приложения: " + appName);
-            System.out.println("Версия: " + appVersion);
-            Scanner scanner = new Scanner(System.in);
-            while (true) {
-                System.out.print("Enter command: ");
-                String command = scanner.nextLine();
-                commandProcessor.processCommand(command);
+            try (Scanner scanner = new Scanner(System.in)) {
+                while (true) {
+                    System.out.print("Enter command: ");
+                    if (!scanner.hasNextLine()) {
+                        break;
+                    }
+                    String command = scanner.nextLine().trim();
+                    if (command.isEmpty()) {
+                        continue;
+                    }
+                    if ("exit".equalsIgnoreCase(command)) {
+                        System.out.println("Exiting...");
+                        break;
+                    }
+                    commandProcessor.processCommand(command);
+                }
             }
         };
     }
