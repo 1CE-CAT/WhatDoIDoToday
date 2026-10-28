@@ -33,7 +33,7 @@ public class User {
     private String password;
 
     @Enumerated 
-    @Column(nullable = false)
+    @Column
     private Role role;
 
     @JsonIgnore
@@ -57,6 +57,9 @@ public class User {
 
     public List<Task> getTasks() { return tasks; }
     public void setTasks(List<Task> tasks) { this.tasks = tasks; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
     @Override
     public String toString() {

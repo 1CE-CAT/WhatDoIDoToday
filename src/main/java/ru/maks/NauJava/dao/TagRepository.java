@@ -5,6 +5,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import ru.maks.NauJava.entity.Tag;
 
-@RepositoryRestResource(path = "tag") 
+@RepositoryRestResource(path = "tags") 
 public interface TagRepository extends CrudRepository<Tag, Long> {
 }

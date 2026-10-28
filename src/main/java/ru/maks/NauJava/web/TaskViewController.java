@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import jakarta.transaction.Transactional;
 import ru.maks.NauJava.dao.TaskRepository;
 
 @Controller
@@ -20,6 +21,7 @@ public class TaskViewController {
     }
 
     @GetMapping("/task")
+    @Transactional
     public String taskList(Model model) {
         model.addAttribute("task", taskRepository.findAll());
         return "task"; 
