@@ -25,6 +25,12 @@ public class Category {
     @Column
     private String color;
 
+    @Column(length = 500)
+    private String description;
+
+    @Column
+    private String icon;
+
     @OneToMany(mappedBy = "category")
     private List<Task> tasks = new ArrayList<>();
 
@@ -42,6 +48,12 @@ public class Category {
 
     public List<Task> getTasks() { return tasks; }
     public void setTasks(List<Task> tasks) { this.tasks = tasks; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
     @Override
     public String toString() {

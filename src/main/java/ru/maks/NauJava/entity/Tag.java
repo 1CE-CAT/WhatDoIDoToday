@@ -22,6 +22,12 @@ public class Tag {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column
+    private String color;
+
+    @Column(length = 500)
+    private String description;
+
     @ManyToMany(mappedBy = "tags")
     private Set<Task> tasks = new HashSet<>();
 
@@ -36,6 +42,12 @@ public class Tag {
 
     public Set<Task> getTasks() { return tasks; }
     public void setTasks(Set<Task> tasks) { this.tasks = tasks; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     @Override
     public String toString() {

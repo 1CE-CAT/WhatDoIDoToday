@@ -26,6 +26,12 @@ public class Comment {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private String author;
+
+    @Column
+    private LocalDateTime updatedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
@@ -44,6 +50,12 @@ public class Comment {
 
     public Task getTask() { return task; }
     public void setTask(Task task) { this.task = task; }
+
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     @Override
     public String toString() {

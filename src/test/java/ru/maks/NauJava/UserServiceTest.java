@@ -5,8 +5,10 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import ru.maks.NauJava.dao.CommentRepository;
 import ru.maks.NauJava.dao.TaskRepository;
@@ -21,19 +23,19 @@ import ru.maks.NauJava.service.UserService;
 class UserServiceTest {
 
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
+
+    @SpyBean
+    private UserRepository userRepository;
 
     @Autowired
-    UserServiceTest(UserService userService,
-                    UserRepository userRepository,
-                    TaskRepository taskRepository,
-                    CommentRepository commentRepository) {
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    public UserServiceTest(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
-        this.taskRepository = taskRepository;
-        this.commentRepository = commentRepository;
     }
 
     @Test
@@ -70,27 +72,39 @@ class UserServiceTest {
 
     @Test
     void testDeleteUserAndRelatedData_Rollback() {
-        User controlUser = new User();
-        controlUser.setName("ControlUser_" + UUID.randomUUID());
-        controlUser.setEmail(UUID.randomUUID() + "@test.com");
-        controlUser.setPassword("password");
-        userRepository.save(controlUser);
+        User user = new User();
+        user.setName("RollbackUser_" + UUID.randomUUID());
+        user.setEmail(UUID.randomUUID() + "@test.com");
+        user.setPassword("password");
+        userRepository.save(user);
 
-        Task controlTask = new Task();
-        controlTask.setTitle("Контрольная задача");
-        controlTask.setStatus(TaskStatus.NEW);
-        controlTask.setUser(controlUser);
-        taskRepository.save(controlTask);
+        Task task = new Task();
+        task.setTitle("Задача для отката");
+        task.setStatus(TaskStatus.NEW);
+        task.setUser(user);
+        taskRepository.save(task);
 
-        Long controlUserId = controlUser.getId();
-        Long controlTaskId = controlTask.getId();
+        Comment comment = new Comment();
+        comment.setText("Комментарий для отката");
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setTask(task);
+        commentRepository.save(comment);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            userService.deleteUserAndRelatedData(-1L);
+        Long userId = user.getId();
+        Long taskId = task.getId();
+        Long commentId = comment.getId();
+
+        Mockito.doThrow(new RuntimeException("Симуляция сбоя базы данных при удалении пользователя"))
+               .when(userRepository).delete(Mockito.any(User.class));
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            userService.deleteUserAndRelatedData(userId);
         });
-        Assertions.assertTrue(userRepository.findById(controlUserId).isPresent(),
-                "Контрольный пользователь был удален, хотя не должен был");
-        Assertions.assertTrue(taskRepository.findById(controlTaskId).isPresent(),
-                "Контрольная задача была удалена, хотя не должна была");
+
+        Assertions.assertTrue(userRepository.findById(userId).isPresent(), 
+                "ОШИБКА: Пользователь был удален, хотя транзакция должна была откатиться!");
+        Assertions.assertTrue(taskRepository.findById(taskId).isPresent(), 
+                "ОШИБКА: Задача была удалена, хотя транзакция должна была откатиться!");
+        Assertions.assertTrue(commentRepository.findById(commentId).isPresent(), 
+                "ОШИБКА: Комментарий был удален, хотя транзакция должна была откатиться!");
     }
 }
